@@ -47,7 +47,6 @@ http.createServer(function (request, response) {
       response.end();
       return;
     }
-
     fs.readFile(filename, "binary", function (err, file) {
       if (err) {
         response.writeHead(500, { "Content-Type": "text/plain" });
@@ -76,13 +75,23 @@ wss.on('connection', function connection(ws) {
       fs.writeFile("ServerFiles/" + messageData.fileName, messageData.fileData, function (err) {
         if (err) return console.log(err);
       });
-    } else if (messageData.action == "loadFile") {
-      fs.readFile(process.cwd() + "/ServerFiles/" + messageData.fileName, "binary", function (err, file) {
+    } else if (messageData.action == "requestFile") {
+      var filename = process.cwd() + "/ServerFiles/" + messageData.fileName;
+      fs.exists(filename, function (exists) {
+        if (!exists) {
+          ws.send(JSON.stringify({
+            action: "requestFileResponse",
+            file: "File Not Found"
+          }));
+          return;
+        }
+      fs.readFile(filename, "binary", function (err, file) {
         ws.send(JSON.stringify({
-          action: "loadFileResponse",
+          action: "requestFileResponse",
           file: file
         }));
       });
+    });
     } else if (messageData.action == "requestFileList") {
       var jsonData = [];
       fs.readdir(serverFolder, (err, files) => {
@@ -94,6 +103,11 @@ wss.on('connection', function connection(ws) {
           fileList: jsonData
         }));
       });
+    } else if (messageData.action == "?") {
+      ws.send(JSON.stringify({
+        action: "?Response",
+        responseText: "Options: \nrequestFileList    Returns list of hosted files\nrequestFile     Returns File requested\nsaveFile    Saves file to server"
+      }));
     }
   });
 });
