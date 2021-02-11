@@ -6,6 +6,7 @@ var http = require("http"),
   fs = require("fs")
 port = process.argv[2] || serverPort;
 var fs = require('fs');
+const request = require('request');
 const serverFolder = './ServerFiles/';
 if (!fs.existsSync(serverFolder)) {
   fs.mkdirSync(serverFolder);
@@ -85,13 +86,20 @@ wss.on('connection', function connection(ws) {
           }));
           return;
         }
-      fs.readFile(filename, "binary", function (err, file) {
+        fs.readFile(filename, "binary", function (err, file) {
+          ws.send(JSON.stringify({
+            action: "requestFileResponse",
+            file: file
+          }));
+        });
+      });
+    } else if (messageData.action == "requestRemoteFile") {
+      request(messageData.url, function (err, res, body) {
         ws.send(JSON.stringify({
-          action: "requestFileResponse",
-          file: file
+          action: "requestRemoteFileResponse",
+          file: body
         }));
       });
-    });
     } else if (messageData.action == "requestFileList") {
       var jsonData = [];
       fs.readdir(serverFolder, (err, files) => {
@@ -106,7 +114,7 @@ wss.on('connection', function connection(ws) {
     } else if (messageData.action == "?") {
       ws.send(JSON.stringify({
         action: "?Response",
-        responseText: "Options: \nrequestFileList    Returns list of hosted files\nrequestFile     Returns File requested\nsaveFile    Saves file to server"
+        responseText: "Options: \nrequestFileList    Returns list of hosted files\nrequestFile     Returns File requested\nrequestRemoteFile    Retrieves files from remote URL\nsaveFile    Saves file to server\n"
       }));
     }
   });
