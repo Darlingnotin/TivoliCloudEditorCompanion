@@ -11,6 +11,7 @@ const serverFolder = './ServerFiles/';
 if (!fs.existsSync(serverFolder)) {
   fs.mkdirSync(serverFolder);
 }
+var pageData;
 http.createServer(function (request, response) {
   var uri = url.parse(request.url).pathname
     , filename = path.join(process.cwd(), "/ServerFiles", uri);
@@ -32,6 +33,21 @@ http.createServer(function (request, response) {
         jsonData.push(file);
       });
       sendPage(JSON.stringify(jsonData));
+    });
+    return;
+  } else if (uri == "/") {
+    pageData = "<html><head></head><body style=\"background-color:black;\"><h1 style=\"color: white; padding: 10px; background-color: rgb(133, 133, 133); border-radius: 5px;\">Tivoli Cloud Editor Companion Files</h1>";
+    fs.readdir(serverFolder, (err, files) => {
+      if (files.length === 0) {
+        pageData = pageData + "<div style=\"color: white; padding: 5px; background-color: rgb(133, 133, 133); border-radius: 5px;\"><h2>Server Empty</h2></div></body></html>";
+        sendPage(pageData);
+      } else {
+        pageData = pageData + "<div style=\"color: white; padding: 5px; background-color: rgb(133, 133, 133); border-radius: 5px;\">";
+        files.forEach(file => {
+          pageData = pageData + "<h2>http://localhost/" + file + "</h2>";
+        });
+        sendPage(pageData + "</div></body></html>");
+      }
     });
     return;
   }
