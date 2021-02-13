@@ -71,7 +71,11 @@ const WebSocket = require('ws');
 const wss = new WebSocket.Server({ port: 888 });
 wss.on('connection', function connection(ws) {
   ws.on('message', function incoming(data) {
-    var messageData = JSON.parse(data);
+    try {
+      var messageData = JSON.parse(data);
+    } catch (error) {
+      return;
+    }
     if (messageData.action == "saveFile") {
       fs.writeFile("ServerFiles/" + messageData.fileName, messageData.fileData, function (err) {
         if (err) return console.log(err);
