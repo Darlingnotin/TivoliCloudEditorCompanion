@@ -35,6 +35,18 @@ http.createServer(function (request, response) {
       sendPage(JSON.stringify(jsonData));
     });
     return;
+  } else if (request.url == "/?") {
+    var pageData = "<html><head></head><body style=\"background-color:black;\">" +
+      "<div><h1 style=\"color: white; padding: 10px; background-color: rgb(133, 133, 133); border-radius: 5px;\">Tivoli Cloud Editor Companion Help</h1>" +
+      "<h2 style=\"color: white; padding: 10px; background-color: rgb(133, 133, 133); border-radius: 5px;\">Web socket server request methods<br><br>" +
+      "Request<br>{action:\"requestFileList\"}<br>Returns<br>{\"action\":\"requestFileListResponse\",\"fileList\":[\"Files.txt\"]}<br><br>" +
+      "Request<br>{action:\"requestFile\",fileName: \"Files.txt\"}<br>Returns<br>{\"action\":\"requestFileResponse\",\"file\":\"text\"}<br><br>" +
+      "Request<br>{action:\"requestRemoteFile\",url: \"http://localhost/Files.txt\"}<br>Returns<br>{\"action\":\"requestRemoteFileResponse\",\"file\":\"text\"}<br><br>" +
+      "Request<br>{action: \"?\"}</p2></div>";
+    response.writeHead(200, { "Content-Type": "text/html" });
+    response.write(pageData);
+    response.end();
+    return;
   } else if (uri == "/") {
     pageData = "<html><head></head><body style=\"background-color:black;\"><h1 style=\"color: white; padding: 10px; background-color: rgb(133, 133, 133); border-radius: 5px;\">Tivoli Cloud Editor Companion Files</h1>";
     fs.readdir(serverFolder, (err, files) => {
