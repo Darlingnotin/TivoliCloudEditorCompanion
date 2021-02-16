@@ -107,6 +107,9 @@ console.log("Tivoli Cloud Editor Companion Server Up");
 const WebSocket = require('ws');
 const wss = new WebSocket.Server({ port: 888 });
 wss.on('connection', function connection(ws) {
+  if (ws._socket.remoteAddress != "::1") {
+    ws.close();
+  }
   ws.on('message', function incoming(data) {
     try {
       var messageData = JSON.parse(data);
